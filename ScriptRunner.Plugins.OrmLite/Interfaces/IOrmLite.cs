@@ -92,4 +92,16 @@ public interface IOrmLite
     /// <param name="parameters">The parameters for the query, if any.</param>
     /// <returns>A collection of dynamic objects representing the query results.</returns>
     IEnumerable<dynamic> ExecuteDynamicQuery(string query, object? parameters = null);
+
+    /// <summary>
+    /// Converts a collection of objects into a <see cref="DataTable"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of objects in the collection.</typeparam>
+    /// <param name="data">The collection of objects to convert.</param>
+    /// <returns>A <see cref="DataTable"/> representation of the provided collection.</returns>
+    /// <remarks>
+    /// This method maps the properties of the type <typeparamref name="T"/> to columns in the <see cref="DataTable"/>.
+    /// It is intended to facilitate conversion of in-memory collections to a tabular data format.
+    /// </remarks>
+    DataTable ToDataTable<T>(IEnumerable<T> data);
 }

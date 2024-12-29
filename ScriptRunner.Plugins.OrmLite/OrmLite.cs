@@ -159,6 +159,33 @@ public class OrmLite : IOrmLite
     }
 
     /// <summary>
+    /// Converts a collection of objects into a <see cref="DataTable"/>.
+    /// </summary>
+    /// <typeparam name="T">The type of objects in the collection.</typeparam>
+    /// <param name="data">The collection of objects to convert.</param>
+    /// <returns>A <see cref="DataTable"/> representation of the provided collection.</returns>
+    /// <remarks>
+    /// This method dynamically maps the properties of the type <typeparamref name="T"/> to columns in the <see cref="DataTable"/>.
+    /// Null values are handled based on the underlying property type.
+    /// </remarks>
+    public DataTable ToDataTable<T>(IEnumerable<T> data)
+    {
+        var dataTable = new DataTable();
+        var properties = typeof(T).GetProperties();
+
+        foreach (var prop in properties)
+            dataTable.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
+
+        foreach (var item in data)
+        {
+            var values = properties.Select(p => p.GetValue(item)).ToArray();
+            dataTable.Rows.Add(values);
+        }
+
+        return dataTable;
+    }
+
+    /// <summary>
     ///     Ensures that the DbContext has been set before performing operations.
     /// </summary>
     private void EnsureDbContext()
