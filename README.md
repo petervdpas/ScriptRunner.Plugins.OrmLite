@@ -1,15 +1,15 @@
-# ScriptRunner.Plugins.OrmDelight
+# ScriptRunner.Plugins.OrmLite
 
 ![License](https://img.shields.io/badge/license-MIT-green)  
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 
-`OrmDelight` is a lightweight and powerful plugin for **ScriptRunner**, offering seamless database management and operations. With support for SQLite via `SqliteDatabase`, it provides CRUD operations, schema management, dynamic queries, and transactional support.
+`OrmLite` is a lightweight and powerful plugin for **ScriptRunner**, offering seamless database management and operations. With support for SQLite via `SqliteDatabase`, it provides CRUD operations, schema management, dynamic queries, and transactional support.
 
 ---
 
 ## 🚀 Features
 
-- **CRUD Operations**: Easily create, read, update, and delete records in your database.
+- **CRUD Operations**: Create, read, update, and delete records in your database.
 - **Dynamic Query Execution**: Run custom SQL queries with dynamic parameterization.
 - **Schema Management**: Automatically create or update tables based on model definitions.
 - **Attribute-Based Validation**: Enforce validation rules on your models with attributes like `Required` and `Unique`.
@@ -21,7 +21,7 @@
 ## 📦 Installation
 
 ### Plugin Activation
-1. Place the `ScriptRunner.Plugins.OrmDelight` assembly in the `Plugins` folder of your ScriptRunner project.
+1. Place the `ScriptRunner.Plugins.OrmLite` assembly in the `Plugins` folder of your ScriptRunner project.
 2. Ensure the required dependencies (`Microsoft.Data.Sqlite`) are available.
 3. The plugin will be automatically discovered and activated.
 
@@ -31,14 +31,14 @@
 
 ### Writing a Script
 
-Here’s an example script showcasing the use of OrmDelight with a user database:
+Here’s an example script showcasing the use of OrmLite with a user database:
 
 ```csharp
 /*
 {
     "TaskCategory": "Database",
-    "TaskName": "OrmDelightDemo",
-    "TaskDetail": "A demo script showcasing OrmDelight with SQLite"
+    "TaskName": "OrmLiteDemo",
+    "TaskDetail": "A demo script showcasing OrmLite with SQLite"
 }
 */
 
@@ -50,36 +50,36 @@ public class User
     public string Email { get; set; }
 }
 
-// Initialize SqliteDatabase and OrmDelight
+// Initialize SqliteDatabase and OrmLite
 var database = new SqliteDatabase();
 database.Setup("Data Source=database.db");
 database.OpenConnection();
 
-var ormDelight = new OrmDelight();
-ormDelight.SetDbConnection(database);
+var OrmLite = new OrmLite();
+OrmLite.SetDbConnection(database);
 
 // Register the User model
-ormDelight.RegisterModel<User>("Users");
+OrmLite.RegisterModel<User>("Users");
 
 // Insert a new user
 var user = new User { Name = "Alice", Email = "alice@example.com" };
-var userId = ormDelight.Insert("Users", user, transaction: null);
+var userId = OrmLite.Insert("Users", user, transaction: null);
 Dump($"Inserted User ID: {userId}");
 
 // Retrieve all users
-var users = ormDelight.GetAll<User>("Users");
+var users = OrmLite.GetAll<User>("Users");
 DumpTable("All Users", users);
 
 // Update a user
 user.Name = "Alice Updated";
-ormDelight.Update("Users", "Id", user, transaction: null);
+OrmLite.Update("Users", "Id", user, transaction: null);
 
 // Delete a user
-ormDelight.Delete("Users", "Id", userId);
+OrmLite.Delete("Users", "Id", userId);
 
 database.CloseConnection();
 
-return "OrmDelight demo completed.";
+return "OrmLite demo completed.";
 ```
 
 ---
@@ -97,7 +97,7 @@ database.OpenConnection();
 ### Registering Models
 Define your models and register them with table names:
 ```csharp
-ormDelight.RegisterModel<User>("Users");
+OrmLite.RegisterModel<User>("Users");
 ```
 
 ### CRUD Operations
@@ -106,17 +106,17 @@ Perform Create, Read, Update, and Delete operations:
 var user = new User { Name = "John", Email = "john@example.com" };
 
 // Insert
-var userId = ormDelight.Insert("Users", user, transaction: null);
+var userId = OrmLite.Insert("Users", user, transaction: null);
 
 // Read
-var users = ormDelight.GetAll<User>("Users");
+var users = OrmLite.GetAll<User>("Users");
 
 // Update
 user.Name = "John Updated";
-ormDelight.Update("Users", "Id", user);
+OrmLite.Update("Users", "Id", user);
 
 // Delete
-ormDelight.Delete("Users", "Id", userId);
+OrmLite.Delete("Users", "Id", userId);
 ```
 
 ---
@@ -126,24 +126,24 @@ ormDelight.Delete("Users", "Id", userId);
 ### Dynamic Queries
 Run custom SQL queries dynamically:
 ```csharp
-var results = ormDelight.ExecuteDynamicQuery("SELECT * FROM Users WHERE Name = @Name", new { Name = "Alice" });
+var results = OrmLite.ExecuteDynamicQuery("SELECT * FROM Users WHERE Name = @Name", new { Name = "Alice" });
 DumpTable("Dynamic Query Results", results);
 ```
 
 ### Transactions
 Perform multiple operations in a single transaction:
 ```csharp
-ormDelight.ExecuteBatchTransaction(transaction =>
+OrmLite.ExecuteBatchTransaction(transaction =>
 {
-    ormDelight.Insert("Users", new User { Name = "Jane" }, transaction);
-    ormDelight.Update("Users", "Id", new User { Id = 1, Name = "Updated Jane" }, transaction);
+    OrmLite.Insert("Users", new User { Name = "Jane" }, transaction);
+    OrmLite.Update("Users", "Id", new User { Id = 1, Name = "Updated Jane" }, transaction);
 });
 ```
 
 ### Validation
 Ensure entities meet defined validation rules:
 ```csharp
-ormDelight.Validate(new User { Name = null, Email = "invalid@example.com" }); // Throws exception if invalid
+OrmLite.Validate(new User { Name = null, Email = "invalid@example.com" }); // Throws exception if invalid
 ```
 
 ---

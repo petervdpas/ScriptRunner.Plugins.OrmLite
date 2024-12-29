@@ -1,6 +1,6 @@
 using System;
 
-namespace ScriptRunner.Plugins.OrmDelight.Attributes;
+namespace ScriptRunner.Plugins.OrmLite.Attributes;
 
 /// <summary>
 ///     Specifies that a property is a primary key for the associated table.

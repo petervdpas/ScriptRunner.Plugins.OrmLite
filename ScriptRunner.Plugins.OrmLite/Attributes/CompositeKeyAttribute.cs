@@ -1,6 +1,6 @@
 using System;
 
-namespace ScriptRunner.Plugins.OrmDelight.Attributes;
+namespace ScriptRunner.Plugins.OrmLite.Attributes;
 
 /// <summary>
 ///     Specifies that a class has a composite key formed by multiple columns.

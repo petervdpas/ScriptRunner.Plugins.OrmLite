@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using ScriptRunner.Plugins.OrmDelight.Interfaces;
-using ScriptRunner.Plugins.OrmDelight.Models;
+using ScriptRunner.Plugins.OrmLite.Interfaces;
+using ScriptRunner.Plugins.OrmLite.Models;
 
-namespace ScriptRunner.Plugins.OrmDelight;
+namespace ScriptRunner.Plugins.OrmLite;
 
 /// <summary>
 ///     Generic data service that provides CRUD operations and dynamic query execution.
 /// </summary>
-public class OrmDelight : IOrmDelight
+public class OrmLite : IOrmLite
 {
     private DbContext? _dbContext;
 

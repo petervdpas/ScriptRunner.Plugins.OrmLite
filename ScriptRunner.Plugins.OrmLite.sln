@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptRunner.Plugins.OrmDelight", "ScriptRunner.Plugins.OrmDelight\ScriptRunner.Plugins.OrmDelight.csproj", "{764061D1-4A9E-47C0-850E-C70ABB9C96B8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScriptRunner.Plugins.OrmLite", "ScriptRunner.Plugins.OrmLite\ScriptRunner.Plugins.OrmLite.csproj", "{764061D1-4A9E-47C0-850E-C70ABB9C96B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Data;
 
-namespace ScriptRunner.Plugins.OrmDelight.Interfaces;
+namespace ScriptRunner.Plugins.OrmLite.Interfaces;
 
 /// <summary>
 /// Defines a generic interface for a data service that provides CRUD operations, 
 /// dynamic query execution, and schema management.
 /// </summary>
-public interface IOrmDelight
+public interface IOrmLite
 {
     /// <summary>
     /// Sets the database connection to be used by the service.

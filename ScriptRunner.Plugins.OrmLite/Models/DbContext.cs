@@ -4,9 +4,9 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using Dapper;
-using ScriptRunner.Plugins.OrmDelight.Attributes;
+using ScriptRunner.Plugins.OrmLite.Attributes;
 
-namespace ScriptRunner.Plugins.OrmDelight.Models;
+namespace ScriptRunner.Plugins.OrmLite.Models;
 
 /// <summary>
 ///     Provides a context for managing database operations, including schema creation, validation, and query execution.

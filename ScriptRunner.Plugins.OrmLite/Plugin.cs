@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using ScriptRunner.Plugins.Attributes;
-using ScriptRunner.Plugins.OrmDelight.Interfaces;
+using ScriptRunner.Plugins.OrmLite.Interfaces;
 using ScriptRunner.Plugins.Utilities;
 
-namespace ScriptRunner.Plugins.OrmDelight;
+namespace ScriptRunner.Plugins.OrmLite;
 
 /// <summary>
-/// A plugin that integrates OrmDelight into the ScriptRunner system, 
+/// A plugin that integrates OrmLite into the ScriptRunner system, 
 /// providing CRUD operations, dynamic queries, and schema management.
 /// </summary>
 /// <remarks>
@@ -17,19 +17,19 @@ namespace ScriptRunner.Plugins.OrmDelight;
 /// the ScriptRunner environment, including dependency injection and lifecycle management.
 /// </remarks>
 [PluginMetadata(
-    "OrmDelight",
+    "OrmLite",
     "A plugin that provides lightweight ORM-like data services for ScriptRunner.",
     "Peter van de Pas",
     "1.0.0",
     pluginSystemVersion: PluginSystemConstants.CurrentPluginSystemVersion,
     frameworkVersion: PluginSystemConstants.CurrentFrameworkVersion,
-    services: ["IOrmDelight"])]
+    services: ["IOrmLite"])]
 public class Plugin : BaseAsyncServicePlugin
 {
     /// <summary>
     /// Gets the name of the plugin.
     /// </summary>
-    public override string Name => "OrmDelight";
+    public override string Name => "OrmLite";
 
     /// <summary>
     /// Asynchronously initializes the plugin using the provided configuration settings.
@@ -44,9 +44,9 @@ public class Plugin : BaseAsyncServicePlugin
         // Simulate async initialization (e.g., loading settings or validating configurations)
         await Task.Delay(100);
 
-        Console.WriteLine(configuration.TryGetValue("OrmDelightKey", out var ormDelightValue)
-            ? $"OrmDelightKey value: {ormDelightValue}"
-            : "OrmDelightKey not found in configuration.");
+        Console.WriteLine(configuration.TryGetValue("OrmLiteKey", out var ormLiteValue)
+            ? $"OrmLiteKey value: {ormLiteValue}"
+            : "OrmLiteKey not found in configuration.");
     }
     
     /// <summary>
@@ -61,7 +61,7 @@ public class Plugin : BaseAsyncServicePlugin
     {
         // Simulate async service registration (e.g., initializing an external resource)
         await Task.Delay(50);
-        services.AddSingleton<IOrmDelight, OrmDelight>();
+        services.AddSingleton<IOrmLite, OrmLite>();
     }
     
     /// <summary>
@@ -75,6 +75,6 @@ public class Plugin : BaseAsyncServicePlugin
     {
         // Example execution logic
         await Task.Delay(50);
-        Console.WriteLine("OrmDelight Plugin executed.");
+        Console.WriteLine("OrmLite Plugin executed.");
     }
 }

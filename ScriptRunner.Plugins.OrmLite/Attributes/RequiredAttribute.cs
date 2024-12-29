@@ -1,6 +1,6 @@
 using System;
 
-namespace ScriptRunner.Plugins.OrmDelight.Attributes;
+namespace ScriptRunner.Plugins.OrmLite.Attributes;
 
 /// <summary>
 ///     Specifies that a property is required and must not be null or empty.
