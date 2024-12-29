@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Dapper;
 using ScriptRunner.Plugins.OrmLite.Attributes;
+using ScriptRunner.Plugins.OrmLite.Interfaces;
 
 namespace ScriptRunner.Plugins.OrmLite.Models;
 
@@ -39,14 +40,26 @@ public class DbContext
     ///     Registers a model type and ensures the corresponding table exists in the database.
     /// </summary>
     /// <typeparam name="T">The type of the model to register.</typeparam>
-    /// <param name="tableName">The name of the table to create or ensure existence.</param>
-    public void RegisterModel<T>(string tableName)
+    /// <param name="tableName">
+    /// The name of the table to create or ensure existence.
+    /// If null, the table name is inferred from the <see cref="TableAttribute"/>.
+    /// </param>
+    /// <param name="sqlDialect">The SQL dialect to use for type mapping and constraints.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when no table name is provided and the model does not have a <see cref="TableAttribute"/>.
+    /// </exception>
+    public void RegisterModel<T>(ISqlDialect sqlDialect, string? tableName = null)
     {
         if (_dbConnection.State != ConnectionState.Open)
             _dbConnection.Open();
 
         var type = typeof(T);
-        var columns = GetColumns(type);
+        
+        // Use the provided tableName or infer from the TableAttribute
+        tableName ??= type.GetCustomAttribute<TableAttribute>()?.Name 
+                      ?? throw new InvalidOperationException($"The model {type.Name} must have a Table attribute or a tableName must be specified.");
+        
+        var columns = GetColumns(typeof(T), sqlDialect);
         var foreignKeys = GetForeignKeys(type);
 
         // Check for CompositeKeyAttribute
@@ -235,29 +248,30 @@ public class DbContext
     ///     Generates the SQL column definitions based on a type's properties and attributes, with caching.
     /// </summary>
     /// <param name="type">The type to analyze.</param>
+    /// <param name="sqlDialect">The dialect for the target database (e.g., SQLite, SQL Server).</param>
     /// <returns>A collection of SQL column definitions.</returns>
-    private static IEnumerable<string> GetColumns(Type type)
+    private static IEnumerable<string> GetColumns(Type type, ISqlDialect sqlDialect)
     {
         if (ColumnCache.TryGetValue(type, out var cachedColumns)) return cachedColumns;
 
         cachedColumns = type.GetProperties()
             .Select(property =>
             {
-                var columnDefinition = $"{property.Name} {MapTypeToSql(property.PropertyType)}";
+                var columnDefinition = $"{property.Name} {sqlDialect.MapType(property.PropertyType)}";
 
                 var primaryKeyAttr = property.GetCustomAttribute<PrimaryKeyAttribute>();
                 if (primaryKeyAttr != null)
                 {
-                    columnDefinition += " PRIMARY KEY";
+                    columnDefinition += $" {sqlDialect.PrimaryKeySyntax}";
                     if (primaryKeyAttr.AutoIncrement)
-                        columnDefinition += " AUTOINCREMENT";
+                        columnDefinition += $" {sqlDialect.AutoIncrementSyntax}";
                 }
 
                 if (property.GetCustomAttribute<UniqueAttribute>() != null)
-                    columnDefinition += " UNIQUE";
+                    columnDefinition += $" {sqlDialect.UniqueSyntax}";
 
                 if (property.GetCustomAttribute<RequiredAttribute>() != null)
-                    columnDefinition += " NOT NULL";
+                    columnDefinition += $" {sqlDialect.NotNullSyntax}";
 
                 return columnDefinition;
             })
@@ -290,25 +304,5 @@ public class DbContext
         ForeignKeyCache[type] = cachedForeignKeys;
 
         return cachedForeignKeys;
-    }
-
-    /// <summary>
-    ///     Maps a .NET type to its corresponding SQL type.
-    /// </summary>
-    /// <param name="type">The .NET type to map.</param>
-    /// <returns>The SQL type as a string.</returns>
-    /// <exception cref="NotSupportedException">Thrown if the .NET type is not supported.</exception>
-    private static string MapTypeToSql(Type type)
-    {
-        return type switch
-        {
-            { } t when t == typeof(int) => "INTEGER",
-            { } t when t == typeof(string) => "TEXT",
-            { } t when t == typeof(DateTime) => "DATETIME",
-            { } t when t == typeof(bool) => "BOOLEAN",
-            { } t when t == typeof(double) => "REAL",
-            { } t when t == typeof(decimal) => "NUMERIC",
-            _ => throw new NotSupportedException($"Type '{type}' is not supported.")
-        };
     }
 }

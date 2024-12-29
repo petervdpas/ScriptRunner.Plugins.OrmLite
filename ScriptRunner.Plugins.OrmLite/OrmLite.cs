@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using ScriptRunner.Plugins.OrmLite.Attributes;
 using ScriptRunner.Plugins.OrmLite.Interfaces;
 using ScriptRunner.Plugins.OrmLite.Models;
 
@@ -27,11 +28,14 @@ public class OrmLite : IOrmLite
     ///     Registers a model type with the service and ensures the database schema matches.
     /// </summary>
     /// <typeparam name="T">The type of the model to register.</typeparam>
-    /// <param name="tableName">The name of the table for the model.</param>
-    public void RegisterModel<T>(string tableName)
+    /// <param name="sqlDialect">The SQL dialect to use for generating schema definitions (e.g., SQLite, MySQL, etc.).</param>
+    /// <param name="tableName">
+    /// The name of the table for the model. If null, the table name is inferred from the <see cref="TableAttribute" />.
+    /// </param>
+    public void RegisterModel<T>(ISqlDialect sqlDialect, string? tableName = null)
     {
         EnsureDbContext();
-        _dbContext!.RegisterModel<T>(tableName);
+        _dbContext!.RegisterModel<T>(sqlDialect, tableName);
     }
 
     /// <summary>
@@ -80,7 +84,10 @@ public class OrmLite : IOrmLite
     /// <typeparam name="T">The type of the record to insert.</typeparam>
     /// <param name="tableName">The name of the table to insert into.</param>
     /// <param name="entity">The record to insert.</param>
-    /// <param name="transaction">The transaction within which to execute the command.</param>
+    /// <param name="transaction">
+    /// The database transaction to use when executing the command.
+    /// If null, the operation is executed without a transaction.
+    /// </param>
     /// <returns>The ID of the inserted record.</returns>
     public int Insert<T>(string tableName, T entity, IDbTransaction? transaction = null)
     {
@@ -104,7 +111,10 @@ public class OrmLite : IOrmLite
     /// <param name="tableName">The name of the table to update.</param>
     /// <param name="idColumn">The name of the primary key column.</param>
     /// <param name="entity">The updated record.</param>
-    /// <param name="transaction">The transaction to use, if any.</param>
+    /// <param name="transaction">
+    /// The database transaction to use when executing the command.
+    /// If null, the operation is executed without a transaction.
+    /// </param>
     public void Update<T>(string tableName, string idColumn, T entity, IDbTransaction? transaction = null)
     {
         EnsureDbContext();
@@ -127,7 +137,10 @@ public class OrmLite : IOrmLite
     /// <param name="tableName">The name of the table to delete from.</param>
     /// <param name="idColumn">The name of the primary key column.</param>
     /// <param name="idValue">The value of the primary key to delete.</param>
-    /// <param name="transaction">The transaction to use, if any.</param>
+    /// <param name="transaction">
+    /// The database transaction to use when executing the command.
+    /// If null, the operation is executed without a transaction.
+    /// </param>
     public void Delete(string tableName, string idColumn, object idValue, IDbTransaction? transaction = null)
     {
         EnsureDbContext();
@@ -150,39 +163,14 @@ public class OrmLite : IOrmLite
     ///     Executes a custom query and returns the results as dynamic objects.
     /// </summary>
     /// <param name="query">The SQL query to execute.</param>
-    /// <param name="parameters">The parameters for the query, if any.</param>
+    /// <param name="parameters">
+    /// The parameters to use with the SQL query. If null, no parameters are applied.
+    /// </param>
     /// <returns>A list of dynamic objects representing the query results.</returns>
     public IEnumerable<dynamic> ExecuteDynamicQuery(string query, object? parameters = null)
     {
         EnsureDbContext();
         return _dbContext!.Query(query, parameters); // Use the dynamic-specific overload
-    }
-
-    /// <summary>
-    /// Converts a collection of objects into a <see cref="DataTable"/>.
-    /// </summary>
-    /// <typeparam name="T">The type of objects in the collection.</typeparam>
-    /// <param name="data">The collection of objects to convert.</param>
-    /// <returns>A <see cref="DataTable"/> representation of the provided collection.</returns>
-    /// <remarks>
-    /// This method dynamically maps the properties of the type <typeparamref name="T"/> to columns in the <see cref="DataTable"/>.
-    /// Null values are handled based on the underlying property type.
-    /// </remarks>
-    public DataTable ToDataTable<T>(IEnumerable<T> data)
-    {
-        var dataTable = new DataTable();
-        var properties = typeof(T).GetProperties();
-
-        foreach (var prop in properties)
-            dataTable.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
-
-        foreach (var item in data)
-        {
-            var values = properties.Select(p => p.GetValue(item)).ToArray();
-            dataTable.Rows.Add(values);
-        }
-
-        return dataTable;
     }
 
     /// <summary>

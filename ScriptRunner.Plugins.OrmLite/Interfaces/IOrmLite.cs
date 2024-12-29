@@ -20,9 +20,13 @@ public interface IOrmLite
     /// Registers a model type and ensures the database schema matches the model.
     /// </summary>
     /// <typeparam name="T">The type of the model to register.</typeparam>
-    /// <param name="tableName">The name of the table for the model.</param>
-    void RegisterModel<T>(string tableName);
-
+    /// <param name="sqlDialect">The SQL dialect to use for generating schema definitions (e.g., SQLite, MySQL, etc.).</param>
+    /// <param name="tableName">
+    /// The name of the table to create or ensure existence.
+    /// If null, the table name is inferred from the TableAttribute.
+    /// </param>
+    void RegisterModel<T>(ISqlDialect sqlDialect, string? tableName = null);
+    
     /// <summary>
     /// Validates an entity's properties based on specified attributes.
     /// </summary>
@@ -92,16 +96,4 @@ public interface IOrmLite
     /// <param name="parameters">The parameters for the query, if any.</param>
     /// <returns>A collection of dynamic objects representing the query results.</returns>
     IEnumerable<dynamic> ExecuteDynamicQuery(string query, object? parameters = null);
-
-    /// <summary>
-    /// Converts a collection of objects into a <see cref="DataTable"/>.
-    /// </summary>
-    /// <typeparam name="T">The type of objects in the collection.</typeparam>
-    /// <param name="data">The collection of objects to convert.</param>
-    /// <returns>A <see cref="DataTable"/> representation of the provided collection.</returns>
-    /// <remarks>
-    /// This method maps the properties of the type <typeparamref name="T"/> to columns in the <see cref="DataTable"/>.
-    /// It is intended to facilitate conversion of in-memory collections to a tabular data format.
-    /// </remarks>
-    DataTable ToDataTable<T>(IEnumerable<T> data);
 }
