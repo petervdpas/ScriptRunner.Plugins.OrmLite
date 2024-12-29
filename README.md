@@ -3,7 +3,9 @@
 ![License](https://img.shields.io/badge/license-MIT-green)  
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 
-`OrmLite` is a lightweight and powerful plugin for **ScriptRunner**, offering seamless database management and operations. With support for SQLite via `SqliteDatabase`, it provides CRUD operations, schema management, dynamic queries, and transactional support.
+`OrmLite` is a lightweight and powerful plugin for **ScriptRunner**, offering seamless database management 
+and operations. With support for SQLite via `SqliteDatabase`, it provides CRUD operations, schema management, 
+dynamic queries, and transactional support.
 
 ---
 
