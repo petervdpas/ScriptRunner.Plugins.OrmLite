@@ -11,21 +11,21 @@ namespace ScriptRunner.Plugins.OrmLite.Interfaces;
 public interface IOrmLite
 {
     /// <summary>
-    /// Sets the database connection to be used by the service.
+    /// Sets the database connection and SQL dialect to be used by the service.
     /// </summary>
     /// <param name="dbConnection">The database connection to use.</param>
-    void SetDbConnection(IDbConnection dbConnection);
+    /// <param name="sqlDialect">The SQL dialect to use for schema and query generation.</param>
+    void Initialize(IDbConnection dbConnection, ISqlDialect sqlDialect);
 
     /// <summary>
     /// Registers a model type and ensures the database schema matches the model.
     /// </summary>
     /// <typeparam name="T">The type of the model to register.</typeparam>
-    /// <param name="sqlDialect">The SQL dialect to use for generating schema definitions (e.g., SQLite, MySQL, etc.).</param>
     /// <param name="tableName">
     /// The name of the table to create or ensure existence.
     /// If null, the table name is inferred from the TableAttribute.
     /// </param>
-    void RegisterModel<T>(ISqlDialect sqlDialect, string? tableName = null);
+    void RegisterModel<T>(string? tableName = null);
     
     /// <summary>
     /// Validates an entity's properties based on specified attributes.

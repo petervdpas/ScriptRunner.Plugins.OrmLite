@@ -44,4 +44,11 @@ public class SQLiteDialect : ISqlDialect
     /// Gets the syntax for defining a non-null constraint in SQLite.
     /// </summary>
     public string NotNullSyntax => "NOT NULL";
+    
+    /// <summary>
+    /// Gets the query to retrieve the ID of the last inserted row in SQLite.
+    /// </summary>
+    /// <param name="tableName">The name of the table (not used in SQLite's syntax).</param>
+    /// <returns>A SQL query string to retrieve the last inserted row ID.</returns>
+    public string GetLastInsertIdQuery(string tableName) => "SELECT last_insert_rowid();";
 }

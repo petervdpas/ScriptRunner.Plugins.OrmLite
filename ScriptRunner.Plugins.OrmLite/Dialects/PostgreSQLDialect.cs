@@ -44,4 +44,11 @@ public class PostgreSQLDialect : ISqlDialect
     /// Gets the syntax for defining a non-null constraint in PostgreSQL.
     /// </summary>
     public string NotNullSyntax => "NOT NULL";
+    
+    /// <summary>
+    /// Gets the query to retrieve the ID of the last inserted row in PostgreSQL.
+    /// </summary>
+    /// <param name="tableName">The name of the table to retrieve the sequence from.</param>
+    /// <returns>A SQL query string to retrieve the last inserted row ID using PostgreSQL's sequence mechanism.</returns>
+    public string GetLastInsertIdQuery(string tableName) => $"SELECT CURRVAL(pg_get_serial_sequence('{tableName}', 'id'));";
 }

@@ -44,4 +44,11 @@ public class MSSQLDialect : ISqlDialect
     /// Gets the syntax for defining a non-null constraint in Microsoft SQL Server.
     /// </summary>
     public string NotNullSyntax => "NOT NULL";
+    
+    /// <summary>
+    /// Gets the query to retrieve the ID of the last inserted row in Microsoft SQL Server.
+    /// </summary>
+    /// <param name="tableName">The name of the table (not used in SQL Server's syntax).</param>
+    /// <returns>A SQL query string to retrieve the last inserted row ID.</returns>
+    public string GetLastInsertIdQuery(string tableName) => "SELECT SCOPE_IDENTITY();";
 }

@@ -44,4 +44,11 @@ public class MySQLDialect : ISqlDialect
     /// Gets the syntax for defining a non-null constraint in MySQL.
     /// </summary>
     public string NotNullSyntax => "NOT NULL";
+    
+    /// <summary>
+    /// Gets the query to retrieve the ID of the last inserted row in MySQL.
+    /// </summary>
+    /// <param name="tableName">The name of the table (unused in MySQL's LAST_INSERT_ID mechanism).</param>
+    /// <returns>A SQL query string to retrieve the last inserted row ID using MySQL's LAST_INSERT_ID function.</returns>
+    public string GetLastInsertIdQuery(string tableName) => "SELECT LAST_INSERT_ID();";
 }

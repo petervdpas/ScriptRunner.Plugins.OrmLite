@@ -34,4 +34,11 @@ public interface ISqlDialect
     /// Gets the syntax for defining a non-null constraint in the specific SQL dialect.
     /// </summary>
     string NotNullSyntax { get; }
+
+    /// <summary>
+    /// Gets the SQL query used to retrieve the last inserted ID for a specific table.
+    /// </summary>
+    /// <param name="tableName">The name of the table from which the last inserted ID is to be retrieved.</param>
+    /// <returns>A string representing the SQL query to retrieve the last inserted ID.</returns>
+    string GetLastInsertIdQuery(string tableName);
 }

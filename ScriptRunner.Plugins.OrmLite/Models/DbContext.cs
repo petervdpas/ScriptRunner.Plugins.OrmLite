@@ -76,6 +76,10 @@ public class DbContext
                                 );
                                 """;
 
+        // Display the generated SQL for debugging/logging
+        Console.WriteLine($"Generated SQL for table '{tableName}':\n{createTableQuery}");
+
+        // Execute the SQL query to create the table
         _dbConnection.Execute(createTableQuery);
     }
 

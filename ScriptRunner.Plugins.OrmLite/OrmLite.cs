@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using ScriptRunner.Plugins.OrmLite.Attributes;
 using ScriptRunner.Plugins.OrmLite.Interfaces;
 using ScriptRunner.Plugins.OrmLite.Models;
@@ -14,28 +15,30 @@ namespace ScriptRunner.Plugins.OrmLite;
 public class OrmLite : IOrmLite
 {
     private DbContext? _dbContext;
+    private ISqlDialect? _sqlDialect;
 
     /// <summary>
-    ///     Sets the database connection to be used by the service.
+    /// Sets the database connection and SQL dialect to be used by the service.
     /// </summary>
     /// <param name="dbConnection">The database connection to use.</param>
-    public void SetDbConnection(IDbConnection dbConnection)
+    /// <param name="sqlDialect">The SQL dialect to use for schema and query generation.</param>
+    public void Initialize(IDbConnection dbConnection, ISqlDialect sqlDialect)
     {
         _dbContext = new DbContext(dbConnection ?? throw new ArgumentNullException(nameof(dbConnection)));
+        _sqlDialect = sqlDialect ?? throw new ArgumentNullException(nameof(sqlDialect));
     }
 
     /// <summary>
     ///     Registers a model type with the service and ensures the database schema matches.
     /// </summary>
     /// <typeparam name="T">The type of the model to register.</typeparam>
-    /// <param name="sqlDialect">The SQL dialect to use for generating schema definitions (e.g., SQLite, MySQL, etc.).</param>
     /// <param name="tableName">
     /// The name of the table for the model. If null, the table name is inferred from the <see cref="TableAttribute" />.
     /// </param>
-    public void RegisterModel<T>(ISqlDialect sqlDialect, string? tableName = null)
+    public void RegisterModel<T>(string? tableName = null)
     {
-        EnsureDbContext();
-        _dbContext!.RegisterModel<T>(sqlDialect, tableName);
+        EnsureInitialized();
+        _dbContext!.RegisterModel<T>(_sqlDialect!, tableName);
     }
 
     /// <summary>
@@ -46,7 +49,7 @@ public class OrmLite : IOrmLite
     /// <exception cref="InvalidOperationException">Thrown if validation fails.</exception>
     public void Validate<T>(T entity)
     {
-        EnsureDbContext();
+        EnsureInitialized();
         _dbContext!.Validate(entity);
     }
 
@@ -58,7 +61,7 @@ public class OrmLite : IOrmLite
     /// <returns>A list of records of type <typeparamref name="T" />.</returns>
     public IEnumerable<T> GetAll<T>(string tableName)
     {
-        EnsureDbContext();
+        EnsureInitialized();
         var query = $"SELECT * FROM {tableName}";
         return _dbContext!.Query<T>(query);
     }
@@ -73,7 +76,7 @@ public class OrmLite : IOrmLite
     /// <returns>The matching record of type <typeparamref name="T" />, or null if not found.</returns>
     public T? GetById<T>(string tableName, string idColumn, object idValue)
     {
-        EnsureDbContext();
+        EnsureInitialized();
         var query = $"SELECT * FROM {tableName} WHERE {idColumn} = @Id";
         return _dbContext!.QuerySingleOrDefault<T>(query, new { Id = idValue });
     }
@@ -91,17 +94,33 @@ public class OrmLite : IOrmLite
     /// <returns>The ID of the inserted record.</returns>
     public int Insert<T>(string tableName, T entity, IDbTransaction? transaction = null)
     {
-        EnsureDbContext();
-        var columns = string.Join(", ", typeof(T).GetProperties().Select(p => p.Name));
-        var parameters = string.Join(", ", typeof(T).GetProperties().Select(p => $"@{p.Name}"));
+        EnsureInitialized();
 
+        // Get properties excluding auto-increment columns
+        var properties = typeof(T).GetProperties()
+            .Where(p =>
+            {
+                var primaryKeyAttribute = p.GetCustomAttribute<PrimaryKeyAttribute>();
+                return primaryKeyAttribute?.AutoIncrement != true;
+            })
+            .ToList();
+
+        // Generate column and parameter lists
+        var columns = string.Join(", ", properties.Select(p => p.Name));
+        var parameters = string.Join(", ", properties.Select(p => $"@{p.Name}"));
+
+        // Insert query
         var query = $"""
-                     INSERT INTO {tableName} ({columns}) 
+                     INSERT INTO {tableName} ({columns})
                      VALUES ({parameters});
-                     SELECT last_insert_rowid();
                      """;
 
-        return _dbContext!.ExecuteScalar<int>(query, entity, transaction);
+        // Execute the insert
+        _dbContext!.Execute(query, entity, transaction);
+
+        // Retrieve the last inserted ID using the dialect-specific query
+        var lastInsertIdQuery = _sqlDialect!.GetLastInsertIdQuery(tableName);
+        return _dbContext.ExecuteScalar<int>(lastInsertIdQuery, transaction);
     }
 
     /// <summary>
@@ -117,7 +136,7 @@ public class OrmLite : IOrmLite
     /// </param>
     public void Update<T>(string tableName, string idColumn, T entity, IDbTransaction? transaction = null)
     {
-        EnsureDbContext();
+        EnsureInitialized();
         var setClause = string.Join(", ", typeof(T).GetProperties()
             .Where(p => !p.Name.Equals(idColumn, StringComparison.OrdinalIgnoreCase))
             .Select(p => $"{p.Name} = @{p.Name}"));
@@ -143,7 +162,7 @@ public class OrmLite : IOrmLite
     /// </param>
     public void Delete(string tableName, string idColumn, object idValue, IDbTransaction? transaction = null)
     {
-        EnsureDbContext();
+        EnsureInitialized();
         var query = $"DELETE FROM {tableName} WHERE {idColumn} = @Id";
         _dbContext!.Execute(query, new { Id = idValue }, transaction);
     }
@@ -155,7 +174,7 @@ public class OrmLite : IOrmLite
     /// <exception cref="Exception">Re-throws any exceptions that occur within the transaction.</exception>
     public void ExecuteBatchTransaction(Action<IDbTransaction> operations)
     {
-        EnsureDbContext();
+        EnsureInitialized();
         _dbContext!.ExecuteInTransaction(operations);
     }
     
@@ -169,16 +188,16 @@ public class OrmLite : IOrmLite
     /// <returns>A list of dynamic objects representing the query results.</returns>
     public IEnumerable<dynamic> ExecuteDynamicQuery(string query, object? parameters = null)
     {
-        EnsureDbContext();
+        EnsureInitialized();
         return _dbContext!.Query(query, parameters); // Use the dynamic-specific overload
     }
 
     /// <summary>
-    ///     Ensures that the DbContext has been set before performing operations.
+    /// Ensures the OrmLite service has been properly initialized.
     /// </summary>
-    private void EnsureDbContext()
+    private void EnsureInitialized()
     {
-        if (_dbContext == null)
-            throw new InvalidOperationException("DbContext has not been set. Call SetDbConnection() first.");
+        if (_dbContext == null || _sqlDialect == null)
+            throw new InvalidOperationException("OrmLite has not been initialized. Call Initialize() first.");
     }
 }
