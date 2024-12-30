@@ -2,7 +2,7 @@
 {
     "TaskCategory": "Database",
     "TaskName": "OrmLiteDemo",
-    "TaskDetail": "A demo script showcasing OrmLite with SQLite"
+    "TaskDetail": "A comprehensive demo script showcasing OrmLite with SQLite"
 }
 */
 
@@ -19,45 +19,70 @@ public class User
 
     [Required]
     public string Email { get; set; }
+
+    public string? PhoneNumber { get; set; } // Optional field to showcase nullable property
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Default value to showcase timestamps
 }
 
 // Initialize SqliteDatabase and OrmLite
 var sqlDialect = new SQLiteDialect();
 var database = new SqliteDatabase();
-database.Setup("Data Source=database.db");
+database.Setup("Data Source=enhanced_database.db");
 database.OpenConnection();
 
 var ormLite = new OrmLite();
-ormLite.SetDbConnection(database.GetConnection());
+ormLite.Initialize(database.GetConnection(), sqlDialect);
 
 // Register the User model
-ormLite.RegisterModel<User>(sqlDialect);
+ormLite.RegisterModel<User>();
 
-// Insert a new user
-var user = new User { Name = "Alice", Email = "alice@example.com" };
-var userId = ormLite.Insert("Users", user, transaction: null);
-Dump($"Inserted User ID: {userId}");
+// Insert multiple users
+var usersToInsert = new List<User>
+{
+    new User { Name = "Alice", Email = "alice@example.com", PhoneNumber = "123-456-7890" },
+    new User { Name = "Bob", Email = "bob@example.com" },
+    new User { Name = "Charlie", Email = "charlie@example.com", PhoneNumber = "987-654-3210" }
+};
+
+foreach (var newUser in usersToInsert)
+{
+    var newUserId = ormLite.Insert("Users", newUser);
+    Dump($"Inserted User ID: {newUserId}, Name: {newUser.Name}");
+}
 
 // Retrieve all users
-var users = ormLite.GetAll<User>("Users");
+var allUsers = ormLite.GetAll<User>("Users");
+var allUsersDataTable = allUsers.ToDataTable();
+DumpTable("All Users After Insertions", allUsersDataTable);
 
-// Convert to DataTable for DumpTable
-var usersDataTable = users.ToDataTable();
-DumpTable("All Users", usersDataTable);
+// Perform advanced filtering (search by name)
+var searchName = "Alice";
+var filteredUsers = allUsers.Where(u => u.Name.Contains(searchName, StringComparison.OrdinalIgnoreCase)).ToList();
+var filteredUsersTable = filteredUsers.ToDataTable();
+DumpTable($"Filtered Users Containing '{searchName}'", filteredUsersTable);
 
-// Update a user
-user.Name = "Alice Updated";
-ormLite.Update("Users", "Id", user, transaction: null);
-Dump($"Updated User: {user.Name}");
+// Update a user (add a phone number for Bob)
+var userToUpdate = allUsers.FirstOrDefault(u => u.Name == "Bob");
+if (userToUpdate != null)
+{
+    userToUpdate.PhoneNumber = "555-555-5555";
+    ormLite.Update("Users", "Id", userToUpdate);
+    Dump($"Updated User: {userToUpdate.Name}, Phone: {userToUpdate.PhoneNumber}");
+}
 
 // Retrieve and show updated user data
-var updatedUsers = ormLite.GetAll<User>("Users");
-var updatedUsersDataTable = updatedUsers.ToDataTable();
-DumpTable("Updated Users", updatedUsersDataTable);
+var updatedAllUsers = ormLite.GetAll<User>("Users");
+var updatedUsersTable = updatedAllUsers.ToDataTable();
+DumpTable("All Users After Updates", updatedUsersTable);
 
-// Delete a user
-ormLite.Delete("Users", "Id", userId);
-Dump($"Deleted User ID: {userId}");
+// Delete a specific user (Charlie)
+var userToDelete = updatedAllUsers.FirstOrDefault(u => u.Name == "Charlie");
+if (userToDelete != null)
+{
+    ormLite.Delete("Users", "Id", userToDelete.Id);
+    Dump($"Deleted User ID: {userToDelete.Id}, Name: {userToDelete.Name}");
+}
 
 // Verify remaining users
 var remainingUsers = ormLite.GetAll<User>("Users");
@@ -67,4 +92,4 @@ DumpTable("Remaining Users", remainingUsersDataTable);
 // Close database connection
 database.CloseConnection();
 
-return "OrmLite demo completed.";
+return "Enhanced OrmLite demo completed.";

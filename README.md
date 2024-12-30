@@ -3,81 +3,93 @@
 ![License](https://img.shields.io/badge/license-MIT-green)  
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 
-`OrmLite` is a lightweight and powerful plugin for **ScriptRunner**, offering seamless database management 
-and operations. With support for SQLite via `SqliteDatabase`, it provides CRUD operations, schema management, 
-dynamic queries, and transactional support.
+`OrmLite` is a powerful and flexible plugin for **ScriptRunner**, providing seamless database management across 
+multiple SQL dialects. This plugin supports CRUD operations, schema management, dynamic queries, 
+and transactional workflows with a focus on simplicity and extensibility.
 
 ---
 
 ## 🚀 Features
 
-- **CRUD Operations**: Create, read, update, and delete records in your database.
-- **Dynamic Query Execution**: Run custom SQL queries with dynamic parameterization.
-- **Schema Management**: Automatically create or update tables based on model definitions.
-- **Attribute-Based Validation**: Enforce validation rules on your models with attributes like `Required` and `Unique`.
-- **Transactional Support**: Perform multiple operations in a single transaction for atomicity.
-- **Seamless SQLite Integration**: Works with `SqliteDatabase` for managing SQLite connections and queries.
+- **Cross-Dialect Support**: Works with SQLite, MySQL, PostgreSQL, and SQL Server via pluggable SQL dialects.
+- **CRUD Operations**: Effortlessly create, read, update, and delete records.
+- **Dynamic Query Execution**: Execute custom SQL queries with dynamic parameterization.
+- **Schema Management**: Automatically create or update tables based on annotated model definitions.
+- **Attribute-Based Validation**: Enforce rules like `Required` and `Unique` directly in your model classes.
+- **Transactional Workflows**: Perform multiple operations atomically.
+- **Seamless SQLite Integration**: Includes a lightweight SQLite dialect for quick setups.
 
 ---
 
 ## 📦 Installation
 
 ### Plugin Activation
-1. Place the `ScriptRunner.Plugins.OrmLite` assembly in the `Plugins` folder of your ScriptRunner project.
-2. Ensure the required dependencies (`Microsoft.Data.Sqlite`) are available.
-3. The plugin will be automatically discovered and activated.
+1. Add the `ScriptRunner.Plugins.OrmLite` assembly to your ScriptRunner project's `Plugins` folder.
+2. Include required dependencies like `Microsoft.Data.Sqlite` for SQLite support.
+3. The plugin will be automatically detected and available for use.
 
 ---
 
 ## 📖 Usage
 
-### Writing a Script
+### Getting Started
 
-Here’s an example script showcasing the use of OrmLite with a user database:
+This example demonstrates a fully functional script using `OrmLite` to manage a simple `Users` table:
 
 ```csharp
 /*
 {
     "TaskCategory": "Database",
     "TaskName": "OrmLiteDemo",
-    "TaskDetail": "A demo script showcasing OrmLite with SQLite"
+    "TaskDetail": "A comprehensive demo script showcasing OrmLite with SQLite"
 }
 */
 
 // Define a User model
+[Table("Users")]
 public class User
 {
+    [PrimaryKey(AutoIncrement = true)]
     public int Id { get; set; }
+
+    [Required]
+    [Unique]
     public string Name { get; set; }
+
+    [Required]
     public string Email { get; set; }
+
+    public string? PhoneNumber { get; set; } // Optional field
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Default timestamp
 }
 
-// Initialize SqliteDatabase and OrmLite
+// Initialize database and OrmLite
+var sqlDialect = new SQLiteDialect();
 var database = new SqliteDatabase();
-database.Setup("Data Source=database.db");
+database.Setup("Data Source=example_database.db");
 database.OpenConnection();
 
-var OrmLite = new OrmLite();
-OrmLite.SetDbConnection(database);
+var ormLite = new OrmLite();
+ormLite.Initialize(database.GetConnection(), sqlDialect);
 
 // Register the User model
-OrmLite.RegisterModel<User>("Users");
+ormLite.RegisterModel<User>();
 
-// Insert a new user
+// Insert users
 var user = new User { Name = "Alice", Email = "alice@example.com" };
-var userId = OrmLite.Insert("Users", user, transaction: null);
+var userId = ormLite.Insert("Users", user);
 Dump($"Inserted User ID: {userId}");
 
-// Retrieve all users
-var users = OrmLite.GetAll<User>("Users");
+// Retrieve and display all users
+var users = ormLite.GetAll<User>("Users");
 DumpTable("All Users", users);
 
 // Update a user
 user.Name = "Alice Updated";
-OrmLite.Update("Users", "Id", user, transaction: null);
+ormLite.Update("Users", "Id", user);
 
-// Delete a user
-OrmLite.Delete("Users", "Id", userId);
+// Delete the user
+ormLite.Delete("Users", "Id", userId);
 
 database.CloseConnection();
 
@@ -89,36 +101,32 @@ return "OrmLite demo completed.";
 ## 🔧 Configuration
 
 ### Setting Up the Database
-Initialize the SQLite database connection using `SqliteDatabase`:
 ```csharp
 var database = new SqliteDatabase();
-database.Setup("Data Source=database.db");
+database.Setup("Data Source=example.db");
 database.OpenConnection();
 ```
 
 ### Registering Models
-Define your models and register them with table names:
+Use attributes to define table schema:
 ```csharp
-OrmLite.RegisterModel<User>("Users");
+[Table("Users")]
+public class User
+{
+    [PrimaryKey(AutoIncrement = true)]
+    public int Id { get; set; }
+
+    [Required]
+    [Unique]
+    public string Name { get; set; }
+
+    [Required]
+    public string Email { get; set; }
+}
 ```
-
-### CRUD Operations
-Perform Create, Read, Update, and Delete operations:
+Register the model:
 ```csharp
-var user = new User { Name = "John", Email = "john@example.com" };
-
-// Insert
-var userId = OrmLite.Insert("Users", user, transaction: null);
-
-// Read
-var users = OrmLite.GetAll<User>("Users");
-
-// Update
-user.Name = "John Updated";
-OrmLite.Update("Users", "Id", user);
-
-// Delete
-OrmLite.Delete("Users", "Id", userId);
+ormLite.RegisterModel<User>();
 ```
 
 ---
@@ -126,53 +134,61 @@ OrmLite.Delete("Users", "Id", userId);
 ## 🌟 Advanced Features
 
 ### Dynamic Queries
-Run custom SQL queries dynamically:
 ```csharp
-var results = OrmLite.ExecuteDynamicQuery("SELECT * FROM Users WHERE Name = @Name", new { Name = "Alice" });
+var results = ormLite.ExecuteDynamicQuery("SELECT * FROM Users WHERE Name = @Name", new { Name = "Alice" });
 DumpTable("Dynamic Query Results", results);
 ```
 
 ### Transactions
-Perform multiple operations in a single transaction:
 ```csharp
-OrmLite.ExecuteBatchTransaction(transaction =>
+ormLite.ExecuteBatchTransaction(transaction =>
 {
-    OrmLite.Insert("Users", new User { Name = "Jane" }, transaction);
-    OrmLite.Update("Users", "Id", new User { Id = 1, Name = "Updated Jane" }, transaction);
+    ormLite.Insert("Users", new User { Name = "Jane" }, transaction);
+    ormLite.Update("Users", "Id", new User { Id = 1, Name = "Updated Jane" }, transaction);
 });
 ```
 
 ### Validation
-Ensure entities meet defined validation rules:
 ```csharp
-OrmLite.Validate(new User { Name = null, Email = "invalid@example.com" }); // Throws exception if invalid
+ormLite.Validate(new User { Name = null, Email = "invalid@example.com" }); // Throws exception if invalid
 ```
 
 ---
 
 ## 🧪 Testing
 
-- Test CRUD operations with sample models and SQLite databases.
-- Verify transactional behavior with complex workflows.
-- Test attribute-based validation for edge cases.
+Test scenarios include:
+- CRUD operations with real-world data.
+- Attribute-based validation edge cases.
+- Transactional workflows for atomic operations.
+
+---
+
+## 🛠 Extending OrmLite
+
+OrmLite supports pluggable SQL dialects. Add support for a new database by implementing `ISqlDialect`.
+
+Example: Custom Dialect
+```csharp
+public class CustomDialect : ISqlDialect
+{
+    public string MapType(Type type) { /* Custom mapping logic */ }
+    public string PrimaryKeySyntax => "CUSTOM PRIMARY KEY";
+    public string AutoIncrementSyntax => "CUSTOM AUTOINCREMENT";
+    public string UniqueSyntax => "CUSTOM UNIQUE";
+    public string NotNullSyntax => "CUSTOM NOT NULL";
+    public string GetLastInsertIdQuery(string tableName) => "SELECT LAST_ID()";
+}
+```
 
 ---
 
 ## 📄 Contributing
 
-1. Fork this repository.
-2. Create a feature branch (`git checkout -b feature/YourFeature`).
-3. Commit your changes (`git commit -m 'Add YourFeature'`).
-4. Push the branch (`git push origin feature/YourFeature`).
-5. Open a pull request.
-
----
-
-## Author
-
-Developed with ❤️ by **Peter van de Pas**.
-
-For questions, feedback, or contributions, feel free to open an issue or contact me directly!
+Contributions are welcome! Follow these steps:
+1. Fork the repository.
+2. Create a feature branch.
+3. Submit a pull request.
 
 ---
 
@@ -184,5 +200,4 @@ For questions, feedback, or contributions, feel free to open an issue or contact
 
 ## License
 
-This project is licensed under the [MIT License](./LICENSE).
-
+Licensed under the [MIT License](./LICENSE).
