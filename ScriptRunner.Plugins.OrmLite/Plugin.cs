@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using ScriptRunner.Plugins.Attributes;
+using ScriptRunner.Plugins.Models;
 using ScriptRunner.Plugins.OrmLite.Interfaces;
 using ScriptRunner.Plugins.Utilities;
 
@@ -39,14 +40,11 @@ public class Plugin : BaseAsyncServicePlugin
     /// This method can be used to perform any initial setup required by the plugin,
     /// such as loading configuration settings or validating input.
     /// </remarks>
-    public override async Task InitializeAsync(IDictionary<string, object> configuration)
+    public override async Task InitializeAsync(IEnumerable<PluginSettingDefinition> configuration)
     {
-        // Simulate async initialization (e.g., loading settings or validating configurations)
-        await Task.Delay(100);
-
-        Console.WriteLine(configuration.TryGetValue("OrmLiteKey", out var ormLiteValue)
-            ? $"OrmLiteKey value: {ormLiteValue}"
-            : "OrmLiteKey not found in configuration.");
+        PluginSettingsHelper.DisplayValues(configuration);
+        
+        await Task.CompletedTask;
     }
     
     /// <summary>
