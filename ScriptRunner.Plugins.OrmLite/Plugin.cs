@@ -42,7 +42,18 @@ public class Plugin : BaseAsyncServicePlugin
     /// </remarks>
     public override async Task InitializeAsync(IEnumerable<PluginSettingDefinition> configuration)
     {
-        PluginSettingsHelper.DisplayValues(configuration);
+        if (LocalStorage == null)
+        {
+            throw new InvalidOperationException(
+                "LocalStorage has not been initialized. " +
+                "Ensure the host injects LocalStorage before calling InitializeAsync.");
+        }
+        
+        // Store settings into LocalStorage
+        PluginSettingsHelper.StoreSettings(LocalStorage, configuration);
+
+        // Optionally display the settings
+        PluginSettingsHelper.DisplayStoredSettings(LocalStorage);
         
         await Task.CompletedTask;
     }
@@ -73,6 +84,8 @@ public class Plugin : BaseAsyncServicePlugin
     {
         // Example execution logic
         await Task.Delay(50);
-        Console.WriteLine("OrmLite Plugin executed.");
+        
+        var storedSetting = PluginSettingsHelper.RetrieveSetting<string>(LocalStorage, "PluginName");
+        Console.WriteLine($"Retrieved PluginName: {storedSetting}");
     }
 }
