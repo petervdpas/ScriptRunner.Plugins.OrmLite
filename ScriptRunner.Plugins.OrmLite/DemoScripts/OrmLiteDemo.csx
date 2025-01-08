@@ -1,6 +1,6 @@
 /*
 {
-    "TaskCategory": "Database",
+    "TaskCategory": "Plugins",
     "TaskName": "OrmLiteDemo",
     "TaskDetail": "A comprehensive demo script showcasing OrmLite with SQLite"
 }
