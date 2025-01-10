@@ -35,6 +35,9 @@ database.OpenConnection();
 var ormLite = new OrmLite();
 ormLite.Initialize(database.GetConnection(), sqlDialect);
 
+// This is a demo... so drop before new!
+// database.ExecuteScalar("DROP TABLE IF EXISTS Users");
+
 // Register the User model
 ormLite.RegisterModel<User>();
 
@@ -48,8 +51,16 @@ var usersToInsert = new List<User>
 
 foreach (var newUser in usersToInsert)
 {
-    var newUserId = ormLite.Insert("Users", newUser);
-    Dump($"Inserted User ID: {newUserId}, Name: {newUser.Name}");
+    var existingUser = ormLite.GetAll<User>("Users").FirstOrDefault(u => u.Name == newUser.Name);
+    if (existingUser == null)
+    {
+        var newUserId = ormLite.Insert("Users", newUser);
+        Dump($"Inserted User ID: {newUserId}, Name: {newUser.Name}");
+    }
+    else
+    {
+        Dump($"Skipped User: {newUser.Name} already exists");
+    }
 }
 
 // Retrieve all users
