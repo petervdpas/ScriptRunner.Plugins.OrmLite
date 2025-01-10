@@ -41,7 +41,8 @@ Add metadata to the script for identification and categorization:
 {
     "TaskCategory": "Database",
     "TaskName": "OrmLiteDemo",
-    "TaskDetail": "A comprehensive demo showcasing OrmLite with SQLite."
+    "TaskDetail": "A comprehensive demo showcasing OrmLite with SQLite.",
+    "RequiredPlugins": ["OrmLite"]
 }
 */
 ```
@@ -154,7 +155,8 @@ Here’s the complete script for reference:
 {
     "TaskCategory": "Database",
     "TaskName": "OrmLiteDemo",
-    "TaskDetail": "A comprehensive demo showcasing OrmLite with SQLite."
+    "TaskDetail": "A comprehensive demo showcasing OrmLite with SQLite.",
+    "RequiredPlugins": ["OrmLite"]
 }
 */
 
