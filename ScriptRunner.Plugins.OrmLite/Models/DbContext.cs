@@ -14,17 +14,17 @@ namespace ScriptRunner.Plugins.OrmLite.Models;
 /// </summary>
 public class DbContext
 {
-    private readonly IDbConnection _dbConnection;
-
     /// <summary>
-    /// Cache for column definitions, mapped by type.
+    ///     Cache for column definitions, mapped by type.
     /// </summary>
     private static readonly Dictionary<Type, List<string>> ColumnCache = new();
 
     /// <summary>
-    /// Cache for foreign key definitions, mapped by type.
+    ///     Cache for foreign key definitions, mapped by type.
     /// </summary>
     private static readonly Dictionary<Type, List<string>> ForeignKeyCache = new();
+
+    private readonly IDbConnection _dbConnection;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="DbContext" /> class.
@@ -41,12 +41,12 @@ public class DbContext
     /// </summary>
     /// <typeparam name="T">The type of the model to register.</typeparam>
     /// <param name="tableName">
-    /// The name of the table to create or ensure existence.
-    /// If null, the table name is inferred from the <see cref="TableAttribute"/>.
+    ///     The name of the table to create or ensure existence.
+    ///     If null, the table name is inferred from the <see cref="TableAttribute" />.
     /// </param>
     /// <param name="sqlDialect">The SQL dialect to use for type mapping and constraints.</param>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when no table name is provided and the model does not have a <see cref="TableAttribute"/>.
+    ///     Thrown when no table name is provided and the model does not have a <see cref="TableAttribute" />.
     /// </exception>
     public void RegisterModel<T>(ISqlDialect sqlDialect, string? tableName = null)
     {
@@ -54,11 +54,12 @@ public class DbContext
             _dbConnection.Open();
 
         var type = typeof(T);
-        
+
         // Use the provided tableName or infer from the TableAttribute
-        tableName ??= type.GetCustomAttribute<TableAttribute>()?.Name 
-                      ?? throw new InvalidOperationException($"The model {type.Name} must have a Table attribute or a tableName must be specified.");
-        
+        tableName ??= type.GetCustomAttribute<TableAttribute>()?.Name
+                      ?? throw new InvalidOperationException(
+                          $"The model {type.Name} must have a Table attribute or a tableName must be specified.");
+
         var columns = GetColumns(typeof(T), sqlDialect);
         var foreignKeys = GetForeignKeys(type);
 
@@ -129,7 +130,7 @@ public class DbContext
     }
 
     /// <summary>
-    /// Executes an SQL command and returns the number of affected rows.
+    ///     Executes an SQL command and returns the number of affected rows.
     /// </summary>
     /// <param name="sql">The SQL command to execute.</param>
     /// <param name="parameters">The parameters for the command, if any.</param>
@@ -167,9 +168,9 @@ public class DbContext
             CloseConnection();
         }
     }
-    
+
     /// <summary>
-    /// Executes an SQL command and returns a scalar result.
+    ///     Executes an SQL command and returns a scalar result.
     /// </summary>
     /// <typeparam name="T">The type of the scalar result.</typeparam>
     /// <param name="sql">The SQL command to execute.</param>

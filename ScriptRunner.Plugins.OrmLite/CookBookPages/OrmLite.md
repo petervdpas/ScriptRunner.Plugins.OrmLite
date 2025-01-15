@@ -15,12 +15,13 @@ toc-own-page: true
 
 ## Goal
 
-Learn how to use the **OrmLite** plugin in ScriptRunner to manage SQLite databases efficiently. 
+Learn how to use the **OrmLite** plugin in ScriptRunner to manage SQLite databases efficiently.
 This recipe covers creating, reading, updating, and deleting records, along with schema management and validation.
 
 ## Overview
 
 This recipe demonstrates how to:
+
 1. Define a database schema using attributes.
 2. Perform CRUD operations (Create, Read, Update, Delete).
 3. Dynamically query a database.
@@ -96,6 +97,7 @@ ormLite.RegisterModel<User>();
 ### 5. Perform CRUD Operations
 
 #### Insert Records
+
 Add new users to the **Users** table:
 
 ```csharp
@@ -105,6 +107,7 @@ Dump($"Inserted User ID: {userId}");
 ```
 
 #### Retrieve Records
+
 Fetch all users from the database:
 
 ```csharp
@@ -113,6 +116,7 @@ DumpTable("All Users", users.ToDataTable());
 ```
 
 #### Update Records
+
 Update an existing user's details:
 
 ```csharp
@@ -122,6 +126,7 @@ Dump($"Updated User: {user.Name}");
 ```
 
 #### Delete Records
+
 Delete a user by their ID:
 
 ```csharp
@@ -208,6 +213,7 @@ return "OrmLite demo completed.";
 ## Expected Output
 
 When executed, this script will:
+
 1. Insert a user named Alice.
 2. Retrieve and display all users.
 3. Update Alice's name.

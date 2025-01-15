@@ -18,7 +18,7 @@ public class OrmLite : IOrmLite
     private ISqlDialect? _sqlDialect;
 
     /// <summary>
-    /// Sets the database connection and SQL dialect to be used by the service.
+    ///     Sets the database connection and SQL dialect to be used by the service.
     /// </summary>
     /// <param name="dbConnection">The database connection to use.</param>
     /// <param name="sqlDialect">The SQL dialect to use for schema and query generation.</param>
@@ -33,7 +33,7 @@ public class OrmLite : IOrmLite
     /// </summary>
     /// <typeparam name="T">The type of the model to register.</typeparam>
     /// <param name="tableName">
-    /// The name of the table for the model. If null, the table name is inferred from the <see cref="TableAttribute" />.
+    ///     The name of the table for the model. If null, the table name is inferred from the <see cref="TableAttribute" />.
     /// </param>
     public void RegisterModel<T>(string? tableName = null)
     {
@@ -82,14 +82,14 @@ public class OrmLite : IOrmLite
     }
 
     /// <summary>
-    /// Inserts a new record into a specified table and returns the generated ID within a transaction.
+    ///     Inserts a new record into a specified table and returns the generated ID within a transaction.
     /// </summary>
     /// <typeparam name="T">The type of the record to insert.</typeparam>
     /// <param name="tableName">The name of the table to insert into.</param>
     /// <param name="entity">The record to insert.</param>
     /// <param name="transaction">
-    /// The database transaction to use when executing the command.
-    /// If null, the operation is executed without a transaction.
+    ///     The database transaction to use when executing the command.
+    ///     If null, the operation is executed without a transaction.
     /// </param>
     /// <returns>The ID of the inserted record.</returns>
     public int Insert<T>(string tableName, T entity, IDbTransaction? transaction = null)
@@ -124,15 +124,15 @@ public class OrmLite : IOrmLite
     }
 
     /// <summary>
-    /// Updates an existing record in a specified table by its primary key within a transaction.
+    ///     Updates an existing record in a specified table by its primary key within a transaction.
     /// </summary>
     /// <typeparam name="T">The type of the record to update.</typeparam>
     /// <param name="tableName">The name of the table to update.</param>
     /// <param name="idColumn">The name of the primary key column.</param>
     /// <param name="entity">The updated record.</param>
     /// <param name="transaction">
-    /// The database transaction to use when executing the command.
-    /// If null, the operation is executed without a transaction.
+    ///     The database transaction to use when executing the command.
+    ///     If null, the operation is executed without a transaction.
     /// </param>
     public void Update<T>(string tableName, string idColumn, T entity, IDbTransaction? transaction = null)
     {
@@ -151,14 +151,14 @@ public class OrmLite : IOrmLite
     }
 
     /// <summary>
-    /// Deletes a record from a specified table by its primary key within a transaction.
+    ///     Deletes a record from a specified table by its primary key within a transaction.
     /// </summary>
     /// <param name="tableName">The name of the table to delete from.</param>
     /// <param name="idColumn">The name of the primary key column.</param>
     /// <param name="idValue">The value of the primary key to delete.</param>
     /// <param name="transaction">
-    /// The database transaction to use when executing the command.
-    /// If null, the operation is executed without a transaction.
+    ///     The database transaction to use when executing the command.
+    ///     If null, the operation is executed without a transaction.
     /// </param>
     public void Delete(string tableName, string idColumn, object idValue, IDbTransaction? transaction = null)
     {
@@ -168,7 +168,7 @@ public class OrmLite : IOrmLite
     }
 
     /// <summary>
-    /// Executes multiple database operations within a transaction.
+    ///     Executes multiple database operations within a transaction.
     /// </summary>
     /// <param name="operations">A delegate containing the operations to execute within the transaction.</param>
     /// <exception cref="Exception">Re-throws any exceptions that occur within the transaction.</exception>
@@ -177,13 +177,13 @@ public class OrmLite : IOrmLite
         EnsureInitialized();
         _dbContext!.ExecuteInTransaction(operations);
     }
-    
+
     /// <summary>
     ///     Executes a custom query and returns the results as dynamic objects.
     /// </summary>
     /// <param name="query">The SQL query to execute.</param>
     /// <param name="parameters">
-    /// The parameters to use with the SQL query. If null, no parameters are applied.
+    ///     The parameters to use with the SQL query. If null, no parameters are applied.
     /// </param>
     /// <returns>A list of dynamic objects representing the query results.</returns>
     public IEnumerable<dynamic> ExecuteDynamicQuery(string query, object? parameters = null)
@@ -193,7 +193,7 @@ public class OrmLite : IOrmLite
     }
 
     /// <summary>
-    /// Ensures the OrmLite service has been properly initialized.
+    ///     Ensures the OrmLite service has been properly initialized.
     /// </summary>
     private void EnsureInitialized()
     {
