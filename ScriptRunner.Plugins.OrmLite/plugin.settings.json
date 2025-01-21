@@ -2,6 +2,7 @@
   {
     "Key": "PluginName",
     "Type": "string",
-    "DefaultValue": "OrmLite"
+    "DefaultValue": "OrmLite",
+    "IsSecret": false
   }
 ]
